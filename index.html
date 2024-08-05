@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shooting Game</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #87CEEB; /* Light Blue Background */
+        }
+        #gameCanvas {
+            border: 1px solid #000;
+            background-color: #FFF; /* White Canvas */
+        }
+        .target {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background-color: red;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        const targets = [];
+        let score = 0;
+
+        function spawnTarget() {
+            const target = {
+                x: Math.random() * (canvas.width - 50),
+                y: Math.random() * (canvas.height - 50),
+                width: 50,
+                height: 50
+            };
+            targets.push(target);
+            setTimeout(spawnTarget, 2000); // Spawn a new target every 2 seconds
+        }
+
+        function drawTargets() {
+            for (const target of targets) {
+                ctx.fillStyle = "red";
+                ctx.beginPath();
+                ctx.arc(target.x + target.width / 2, target.y + target.height / 2, target.width / 2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function checkHit(x, y) {
+            for (let i = targets.length - 1; i >= 0; i--) {
+                const target = targets[i];
+                const centerX = target.x + target.width / 2;
+                const centerY = target.y + target.height / 2;
+                const distance = Math.sqrt((x - centerX) ** 2 + (y - centerY) ** 2);
+                if (distance < target.width / 2) {
+                    targets.splice(i, 1); // Remove the target if hit
+                    score++;
+                    console.log("Score:", score);
+                    break;
+                }
+            }
+        }
+
+        canvas.addEventListener("click", (event) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            checkHit(x, y);
+        });
+
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawTargets();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Start the game
+        spawnTarget();
+        gameLoop();
+    </script>
+</body>
+</html>
